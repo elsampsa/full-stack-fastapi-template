@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>UserInfoWidget Test</title>
+    <link href="../lib/bootstrap-5.2.3-dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div id="userInfo"></div>
+    </div>
+
+    <script src="../lib/bootstrap-5.2.3-dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { FAPIUserInfoWidget } from './userinfowidget.js';
+        import { DummyWidget } from '../lib/base/widget.js';
+
+        const userInfoWidget = new FAPIUserInfoWidget("userInfo");
+        const dummyWidget = new DummyWidget();
+
+        userInfoWidget.signals.save.connect(
+            dummyWidget.slot.bind(dummyWidget)
+        );
+
+        userInfoWidget.setLogLevel(-1); // For debugging
+
+        // Test set_datum_slot
+        userInfoWidget.set_datum_slot({
+            uuid: "1234",
+            name: "John Doe",
+            email: "john@example.com"
+        });
+
+        // Add a button to test set_datum_slot again
+        const testButton = document.createElement('button');
+        testButton.textContent = 'Test set_datum_slot';
+        testButton.className = 'btn btn-info mt-3';
+        testButton.onclick = () => {
+            userInfoWidget.set_datum_slot({
+                uuid: "12334",
+                name: "Jane Smith",
+                email: "jane@example.com"
+            });
+        };
+        document.body.appendChild(testButton);
+    </script>
+</body>
+</html>

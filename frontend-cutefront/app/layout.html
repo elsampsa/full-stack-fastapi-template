@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>CuteFront App</title>
+    <link href="../lib/bootstrap-5.2.3-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../lib/include/bootstrap-icons/css/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="../lib/include/fontawesome/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 48px 0 0;
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+        }
+        .main-content {
+            margin-left: 250px; /* Adjust based on your sidebar width */
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar placeholder -->
+            <div id="sidebar" class="col-12 col-md-auto"></div>
+            <!--div id="sidebar" class="col-12 col-md-2 col-lg-1"></div-->
+            <!-- This will make the sidebar take up 2 columns on medium screens and only 1 column on large screens, -->
+            <!-- Main content area -->
+            <div id="main-group" class="col-12 col-md-9 col-lg-10">
+                <!-- Group widget will manage these content areas
+                <div id="home">
+                    <h2>Home</h2>
+                    <p>Welcome to the home page.</p>
+                </div>
+                <div id="items">
+                    <h2>Items</h2>
+                    <p>This is the items page.</p>
+                </div>
+                <div id="settings">
+                    <h2>Settings</h2>
+                    <p>Adjust your settings here.</p>
+                </div>
+                <div id="admin">
+                    <h2>Admin</h2>
+                    <p>Admin controls and information.</p>
+                </div>
+            -->
+            </div>
+        </div>
+    </div>
+
+    <script src="../lib/bootstrap-5.2.3-dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { ElementWidget } from '../lib/base/widget.js';
+        import { ContainerWidget } from '../lib/base/containerwidget.js';
+        import { FAPIGroup } from './fapi-group.js';
+        import { StateWidget } from '../lib/base/statemanager.js';
+        import { SidebarMenuItem } from '../lib/base/sidebarwidget.js';
+        import { FapiSidebar } from './fapi-sidebar.js';
+        import { UserFloaterWidget } from './userfloaterwidget.js';
+        import { HomeWidget, ItemsWidget, SettingsWidget, AdminWidget } from './mainwidgets.js';
+        import { FAPIMockDataSourceWidget  } from './fapi-datasource.js';
+
+        const userFloaterWidget = new UserFloaterWidget("userFloater");
+
+        const dataSource = new FAPIMockDataSourceWidget();
+        dataSource.setLogLevel(-1);
+
+        // Create all widgets
+        const homeWidget = new HomeWidget();
+        const itemsWidget = new ItemsWidget();
+        const settingsWidget = new SettingsWidget();
+        const adminWidget = new AdminWidget();
+        const widgets = [homeWidget, itemsWidget, settingsWidget, adminWidget]
+        // Set debug level for all widgets
+        widgets.forEach(w => w.setLogLevel(-1));
+        const container = new ContainerWidget("main-group")
+        container.setLogLevel(-1);
+        container.setItems({
+            homeWidget: homeWidget,
+            itemsWidget: itemsWidget,
+            settingsWidget: settingsWidget,
+            adminWidget: adminWidget,
+        })
+
+        // Create a state manager
+        class AppStateWidget extends StateWidget {
+            validateInitialState() {
+                if (this.cache.container == null) {
+                    this.setDefaultValues();
+                }
+            }
+        }
+        const stateWidget = new AppStateWidget("state");
+        stateWidget.setLogLevel(-1);
+        stateWidget.register(container);
+
+        // DEFINE SIDEBARWIDGET
+        const fapiSidebar = new FapiSidebar("sidebar");
+        fapiSidebar.setItems({
+            dashboardItem: new SidebarMenuItem('Dashboard', 'dashboard', 'fas fa-home'),
+            itemsItem: new SidebarMenuItem('Items', 'items', 'fas fa-box'),
+            userSettingsItem: new SidebarMenuItem('User Settings', 'user-settings', 'fas fa-cog'),
+            adminItem: new SidebarMenuItem('Admin', 'admin', 'fas fa-user')
+        });
+        fapiSidebar.setUserEmail_slot('john@example.com');
+
+        // CONNECTION ROUTER SECTION FROM SIDEBARWIDGET TO CONTAINERWIDGET
+        fapiSidebar.items.dashboardItem.signals.clicked.connect((id)=>container.show_slot(container.items.homeWidget));
+        fapiSidebar.items.itemsItem.signals.clicked.connect((id)=>container.show_slot(container.items.itemsWidget));
+        fapiSidebar.items.userSettingsItem.signals.clicked.connect((id)=>container.show_slot(container.items.settingsWidget));
+        fapiSidebar.items.adminItem.signals.clicked.connect((id)=>container.show_slot(container.items.adminWidget));
+
+        container.show_slot(homeWidget);
+
+        // NOTE: order is important!
+        stateWidget.connectStateChanges()
+        container.signals.state_change.connect(
+            (el) => {
+                stateWidget.state_save_slot(el)
+            }
+        )
+
+        dataSource.signals.datamodel_create.connect((schema)=> // TODO: consolidate this to the only official way to connect signals to slots
+            container.items.itemsWidget.form.datamodel_slot(schema)
+        );
+
+        dataSource.model_slot() // propagate datamodel
+
+    </script>
+</body>
+</html>

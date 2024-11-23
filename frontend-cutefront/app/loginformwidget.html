@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>LoginFormWidget Test</title>
+    <link href="../lib/bootstrap-5.2.3-dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #login-form {
+            width: 300px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        #login-form input, #login-form button {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="login-form"></div>
+</body>
+<script src="../lib/bootstrap-5.2.3-dist/js/bootstrap.bundle.min.js"></script>
+<script type="module">
+    import { LoginFormWidget } from './loginformwidget.js';
+    
+    let loginForm = new LoginFormWidget('login-form');
+    loginForm.signals.login.connect(
+        (data) => console.log("Login clicked with", data)
+    );
+</script>
+</html>

@@ -1,0 +1,131 @@
+
+# convention:
+#
+# class: MyStuff[Widget]
+# in file: my[-]stuff[widget].js
+# instance: myStuff
+# list of instances: myStuffs
+# slots: some_slot
+# signals: signal.name
+#
+# inheritance:
+# MyStuff -> NewMyStuff
+#
+
+MAIN HTML:
+  - Connections:
+    - from: dataSource.signals.datamodel_create
+      to:   itemsWidget.form.datamodel_slot
+
+  - dataSource:
+    class: FAPIMockDataSourceWidget
+    note: a mock data source for testing
+    pars:
+    UP:
+      signals:
+        - data
+        - datamodel_create # carries datamodel
+          - ../container.items.itemsWidget.form.datamodel_slot # list connections
+        - datamodel_update # carries datamodel
+        - etc.
+    IN:
+      slots:
+        - model_slot # re-emit datamodel signaks
+    SUB:
+
+  - fapiSidebar:
+    pars:
+    UP: 
+      - signal:choose_content:carries string "home","items","settings","admin"
+    IN:
+    SUB:
+      items:
+        dashboardItem:
+        itemsItem:
+        userSettingsItem:
+        adminItem:
+    
+  - container:
+    file: ../lib/base/containerwidget.js
+    pars:
+    UP:
+    IN: 
+      - choose_content_slot: shows the correct subwidget, depending on the string
+    SUB:
+      items:
+        - homeWidget:
+          file: ./mainwidgets.js
+          pars:
+            title: Dashboard
+          SUB:
+            - Hello message
+
+        - itemsWidget:
+          file: ./mainwidgets.js
+          pars:
+            title: Items Management
+          SUB:
+            - button to create a new item
+              - ./form.create_slot
+            - popup for new item data (separate internal widget?)
+            - fapiList:
+              file: ./fapi-listwidget.js
+              pars:
+              UP:
+              IN:
+              SUB:
+                - internal:
+                  - FAPIListItemWidget:
+                    note: hardcoded elements title and description
+                  - FAPIListItemWidget:
+            - form:
+              file: ../lib/base/formwidget.js
+              IN:
+                - datamodel_slot
+                - current_datum_slot
+                - create_slot
+                - update_slot
+              note: has adaptive fields, propagated from datasource widget
+              
+
+        - settingsWidget:
+          file: ./mainwidgets.js
+          pars:
+            title: User Settings
+          UP:
+          IN:
+          SUB:
+            - TabWidget:
+              # TODO: should also be accessible by .items
+              file: ../lib/base/tabwidget.js
+              pars:
+              UP:
+              IN:
+              SUB:
+                - Widget: # a tab
+                  pars:
+                    title: "User"
+                  SUB:
+                    - FAPIUserInfoWidget:
+                      file: ./userinfowidget.js
+                      SUB:
+                        - user fields
+                        - Button [Edit] -> opens fields
+                - Widget: # a tab
+                  pars:
+                    title: "Password"
+                  SUB: 
+                    - ChangePasswordWidget:
+                      file: ./changepassword.js
+                      SUB:
+                        - password fields
+                        - Button [Save]
+                - Widget: # a tab
+                  pars:
+                    title: "Appearance"
+                  SUB:
+                    - AppearanceWidget:
+                      file: ./appearancewidget.js
+                      SUB:
+                        - radiobutton to switch between light/dark mode
+

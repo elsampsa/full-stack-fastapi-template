@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>UserFloaterWidget Test</title>
+    <link href="../lib/bootstrap-5.2.3-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../lib/include/bootstrap-icons/css/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="../lib/include/fontawesome/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Test Page Content</h1>
+        <p>The user floater should appear in the top-left corner.</p>
+    </div>
+
+    <script src="../lib/bootstrap-5.2.3-dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { UserFloaterWidget } from './userfloaterwidget.js';
+        import { DummyWidget } from '../lib/base/widget.js';
+
+        const userFloaterWidget = new UserFloaterWidget("userFloater");
+        const dummyWidget = new DummyWidget();
+
+        userFloaterWidget.signals.profileClicked.connect(
+            () => {
+                console.log("Profile clicked");
+                alert("Profile clicked");
+            }
+        );
+
+        userFloaterWidget.signals.logoutClicked.connect(
+            () => {
+                console.log("Logout clicked");
+                alert("Logout clicked");
+            }
+        );
+
+        userFloaterWidget.setLogLevel(-1); // For debugging
+    </script>
+</body>
+</html>

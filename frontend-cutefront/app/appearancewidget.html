@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>AppearanceWidget Test</title>
+    <link href="../lib/bootstrap-5.2.3-dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div id="appearance"></div>
+        <div id="currentMode" class="mt-3"></div>
+    </div>
+
+    <script src="../lib/bootstrap-5.2.3-dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { AppearanceWidget } from './appearancewidget.js';
+        import { DummyWidget } from '../lib/base/widget.js';
+
+        const appearanceWidget = new AppearanceWidget("appearance");
+        const dummyWidget = new DummyWidget();
+
+        appearanceWidget.signals.modeChanged.connect(
+            dummyWidget.slot.bind(dummyWidget)
+        );
+
+        // Display the current mode
+        const currentModeElement = document.getElementById('currentMode');
+        appearanceWidget.signals.modeChanged.connect((mode) => {
+            currentModeElement.textContent = `Current mode: ${mode}`;
+        });
+
+        appearanceWidget.setLogLevel(-1); // For debugging
+
+        // Optionally, you can test the programmatic mode setting:
+        // setTimeout(() => {
+        //     appearanceWidget.setMode('dark');
+        // }, 3000);
+    </script>
+</body>
+</html>

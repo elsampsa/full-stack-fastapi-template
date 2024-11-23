@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Group Example</title>
+<link href="../lib/bootstrap-5.2.3-dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="tx1"></div>
+<div id="tx2"></div>
+
+<button id="show">kikkelis</button>
+<button id="hide">kokkelis</button>
+
+</body>
+<script src="../lib/bootstrap-5.2.3-dist/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+
+import { DummyWidget } from '../lib/base/widget.js';
+import { StateWidget } from '../lib/base/statemanager.js';
+import { Include } from '../lib/base/include.js';
+import { FAPIGroup } from './fapi-group.js';
+
+var tx1 = new Include("tx1");
+var tx2 = new Include("tx2");
+var dummy_widget = new DummyWidget();
+var group = new FAPIGroup("index");
+group.setItems(tx1, tx2)
+group.setItemNames("kikkelis", "kokkelis")
+
+group.setLogLevel(-1); // debugging
+
+// Create a state manager
+class AppStateWidget extends StateWidget {
+    validateInitialState() {
+        if (this.cache.group == null) {
+            this.setDefaultValues();
+        }
+    }
+}
+const stateWidget = new AppStateWidget("state");
+stateWidget.setLogLevel(-1);
+stateWidget.register(group);
+
+tx1.render_string_slot('KIKKELIS');
+tx2.render_string_slot('KOKKELIS');
+
+let kikkelis = document.getElementById("kikkelis");
+let kokkelis = document.getElementById("kokkelis");
+
+show.onclick = () => {
+    group.show_slot(tx1);
+};
+hide.onclick = () => {
+    group.show_slot(tx2);
+};
+
+stateWidget.connectStateChanges()
+group.signals.state_change.connect(
+    (el) => {
+        stateWidget.state_save_slot(el)
+    }
+)
+
+
+</script>
